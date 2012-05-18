@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+include_recipe "ruby_build"
 include_recipe "rbenv::system_install"
 
 Array(node['ruby_stack']['rubies']).each do |rubie|
@@ -27,19 +28,21 @@ if node['ruby_stack']['global']
   rbenv_global node['rbenv']['global']
 end
 
-node['ruby_stack']['gems'].each_pair do |rubie, gems|
+if node['ruby_stack']['gems']
+  node['ruby_stack']['gems'].each_pair do |rubie, gems|
 
-  gems = Array(gems)
-  gems = [{"name" => "bundler"}] unless (gems.collect do |gem| gem["name"] end).include?("bundler")
-  # Adding Bundler to all rubies installed if not already added by the user into 
-  # gems.
+    gems = Array(gems)
+    gems = [{"name" => "bundler"}] unless (gems.collect do |gem| gem["name"] end).include?("bundler")
+    # Adding Bundler to all rubies installed if not already added by the user into 
+    # gems.
 
-  gems.each do |gem|
-    rbenv_gem gem['name'] do
-      rbenv_version rubie
+    gems.each do |gem|
+      rbenv_gem gem['name'] do
+        rbenv_version rubie
 
-      %w{version action options source}.each do |attr|
-        send(attr, gem[attr]) if gem[attr]
+        %w{version action options source}.each do |attr|
+          send(attr, gem[attr]) if gem[attr]
+        end
       end
     end
   end
@@ -47,7 +50,18 @@ end
 
 Array(node['ruby_stack']['users']).each do |user_name|
   user_dir = Etc.getpwnam(user_name).dir
+
+  directory File.join(user_dir, ".bundle") do
+    owner user_name
+    group user_name
+    mode "0755"
+    action :create
+  end
+
   template "#{user_dir}/.bundle/config" do
     source  "bundle_config.erb"
+    owner user_name
+    group user_name
+    mode "0644"
   end
 end
