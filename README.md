@@ -12,6 +12,20 @@
 * **Bundler** (latest release) is installed within each ruby (globally).
 * `~/.bundle/config` is created to configure Bundler so that it bundles the gems inside each project's `vendor/bundle` directory.
 
+## Dependencies
+
+The following cookbooks are required for this recipe:
+
+* ruby_build
+* rbenv
+
+You can add the following to your `Cheffile` if you're using Librarian:
+
+```
+cookbook 'ruby_build', :git => 'https://github.com/fnichol/chef-ruby_build.git', :ref => 'v0.6.2'
+cookbook 'rbenv', :git => 'https://github.com/fnichol/chef-rbenv', :ref => 'v0.6.8'
+```
+
 ## Example config
 
 Except for the alias of `bundle exec` at the end of the tutorial, this setup is approximatively doing the same setup as this [tutorial](http://www.softr.li/blog/2012/04/10/moving-from-rvm-to-rbenv/) for a `vagrant` user on an Ubuntu machine:
