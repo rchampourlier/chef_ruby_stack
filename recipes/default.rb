@@ -22,21 +22,23 @@ include_recipe "rbenv::system_install"
 
 Array(node['ruby_stack']['rubies']).each do |rubie|
   rbenv_ruby rubie
+
+  # Adding Bundler to each rubie unless it's already in the rubie's
+  # gems list
+  unless node['ruby_stack']['gems'] && node['ruby_stack']['gems'][rubie].include("bundler")
+    rbenv_gem "bundler" do
+      rbenv_version rubie
+    end
+  end
 end
 
 if node['ruby_stack']['global']
-  rbenv_global node['rbenv']['global']
+  rbenv_global node['ruby_stack']['global']
 end
 
 if node['ruby_stack']['gems']
   node['ruby_stack']['gems'].each_pair do |rubie, gems|
-
-    gems = Array(gems)
-    gems = [{"name" => "bundler"}] unless (gems.collect do |gem| gem["name"] end).include?("bundler")
-    # Adding Bundler to all rubies installed if not already added by the user into 
-    # gems.
-
-    gems.each do |gem|
+    Array(gems).each do |gem|
       rbenv_gem gem['name'] do
         rbenv_version rubie
 
