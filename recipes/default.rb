@@ -18,37 +18,27 @@
 #
 
 include_recipe "ruby_build"
-include_recipe "rbenv::system_install"
 
-Array(node['ruby_stack']['rubies']).each do |rubie|
-  rbenv_ruby rubie
+rubies = Array(node['ruby_stack']['rubies'])
 
-  # Adding Bundler to each rubie unless it's already in the rubie's
-  # gems list
-  unless node['ruby_stack']['gems'] && node['ruby_stack']['gems'][rubie].include("bundler")
-    rbenv_gem "bundler" do
-      rbenv_version rubie
-    end
-  end
+gems = (rubies.inject({}) do |hash, rubie|
+  hash.merge!({ rubie => [{ 'name' => 'bundler' }] })
+end)
+
+node['rbenv']['user_installs'] = Array(node['ruby_stack']['users']).inject([]) do |array, user|
+  array.push({
+    'user'      => user,
+    'rubies'    => node['ruby_stack']['rubies'],
+    'global'    => node['ruby_stack']['global'],
+    'gems'      => gems
+  })
+  array
 end
 
-if node['ruby_stack']['global']
-  rbenv_global node['ruby_stack']['global']
-end
+include_recipe "rbenv::user"
 
-if node['ruby_stack']['gems']
-  node['ruby_stack']['gems'].each_pair do |rubie, gems|
-    Array(gems).each do |gem|
-      rbenv_gem gem['name'] do
-        rbenv_version rubie
-
-        %w{version action options source}.each do |attr|
-          send(attr, gem[attr]) if gem[attr]
-        end
-      end
-    end
-  end
-end
+# Create the ~/.bundle/config file for each indicated users. Configures Bundler
+# to manage gems under project's vendor/bundle directory.
 
 Array(node['ruby_stack']['users']).each do |user_name|
   user_dir = Etc.getpwnam(user_name).dir
