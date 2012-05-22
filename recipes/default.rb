@@ -37,23 +37,24 @@ end
 
 include_recipe "rbenv::user"
 
-# Create the ~/.bundle/config file for each indicated users. Configures Bundler
-# to manage gems under project's vendor/bundle directory.
+# If 'ruby_stack'['vendor_gems'] is present and true, create the ~/.bundle/config file for
+# each indicated users. Configures Bundler to manage gems under project's vendor/bundle directory.
+if node['ruby_stack']['vendor_gems']
+  Array(node['ruby_stack']['users']).each do |user_name|
+    user_dir = Etc.getpwnam(user_name).dir
 
-Array(node['ruby_stack']['users']).each do |user_name|
-  user_dir = Etc.getpwnam(user_name).dir
+    directory File.join(user_dir, ".bundle") do
+      owner user_name
+      group user_name
+      mode "0755"
+      action :create
+    end
 
-  directory File.join(user_dir, ".bundle") do
-    owner user_name
-    group user_name
-    mode "0755"
-    action :create
-  end
-
-  template "#{user_dir}/.bundle/config" do
-    source  "bundle_config.erb"
-    owner user_name
-    group user_name
-    mode "0644"
+    template "#{user_dir}/.bundle/config" do
+      source  "bundle_config.erb"
+      owner user_name
+      group user_name
+      mode "0644"
+    end
   end
 end

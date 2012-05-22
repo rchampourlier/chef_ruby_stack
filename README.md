@@ -18,12 +18,25 @@
 "ruby_stack": {
     "rubies": ["1.9.2-p290"],
     "global": "1.9.2-p290",
-    "users":  ["vagrant"]
+    "users":  ["vagrant"],
+    "vendor_gems": true,
   }
 ```
 * `rubies`: an array of rubies known to ruby-build,
 * `global`: the string of the ruby to be set as global,
-* `users` : an array of users for which rbenv will be installed and Bundler configured.
+* `users`: an array of users for which rbenv will be installed and Bundler configured,
+* `vendor_gems`: a boolean to indicate if Bundler should vendor the gems under the project's `vendor/bundle` (see *Vendoring* below).
+
+### Vendoring: pros and cons of vendoring your gems with Bundler under `vendor/bundle`
+
+_Pros_
+
+* The gems are available in your project's `vendor/bundle`. This allows you to investigate the gems source code.
+
+_Cons_
+
+* Your gems are not installed on the Vagrant box' harddrive, so they won't get packaged if you package the box. Anyone getting the packaged box will have to reinstall the gems.
+* The gems get installed in your project's `vendor/bundle`, which is a behavior you may want to reserve to your host development environment. Since your host and virtual box architectures may not match, the gems installed with native extensions will not be usable on your host machine, so you will have to remove them and `bundle install` again if you need to run the project's within the host environment.
 
 
 ## Dependencies
