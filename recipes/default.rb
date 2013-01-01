@@ -42,10 +42,12 @@ include_recipe "rbenv::user"
 if node['ruby_stack']['vendor_gems']
   Array(node['ruby_stack']['users']).each do |user_name|
     user_dir = Etc.getpwnam(user_name).dir
+    group_id = File.stat(user_dir).gid
+    group_name = Etc.getgrgid(group_id).name
 
     directory File.join(user_dir, ".bundle") do
       owner user_name
-      group user_name
+      group group_name
       mode "0755"
       action :create
     end
@@ -53,7 +55,7 @@ if node['ruby_stack']['vendor_gems']
     template "#{user_dir}/.bundle/config" do
       source  "bundle_config.erb"
       owner user_name
-      group user_name
+      group group_name
       mode "0644"
     end
   end
