@@ -1,8 +1,10 @@
 #
-# Cookbook Name:: rbenv
+# Cookbook Name:: ruby_build
 # Recipe:: default
 #
-# Copyright 2011, Fletcher Nichol
+# Author:: Romain Champourlier <romain@softr.li>
+#
+# Copyright 2013, Romain Champourlier
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
